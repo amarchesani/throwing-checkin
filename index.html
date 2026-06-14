@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Throwing Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #132040;
+    --navy-light: #1e3160;
+    --accent: #e8f43a;
+    --accent-dim: #c8d420;
+    --white: #f5f7fa;
+    --muted: #8899bb;
+    --card: #111e36;
+    --border: #1e3160;
+    --red: #ff4444;
+    --green: #3de87a;
+    --radius: 12px;
+  }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 60px;
+  }
+
+  header {
+    width: 100%;
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 20px; height: 20px; }
+
+  .header-text h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .header-text p { font-size: 12px; color: var(--muted); }
+
+  .main {
+    width: 100%;
+    max-width: 480px;
+    padding: 24px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .player-greeting { display: flex; flex-direction: column; gap: 2px; }
+  .player-greeting .hey { font-size: 14px; color: var(--muted); font-weight: 500; }
+  .player-greeting .name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1;
+  }
+  .date-row { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  .workout-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .workout-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+  .workout-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .workout-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .workout-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  .loading-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .error-card {
+    background: rgba(255,68,68,0.1);
+    border: 1px solid rgba(255,68,68,0.3);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    color: #ff8888;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .photo-zone {
+    background: var(--card);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-zone:hover { border-color: var(--accent); background: rgba(232,244,58,0.04); }
+  .photo-zone.has-photo { border-style: solid; border-color: var(--accent); }
+  .photo-zone img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+    border-radius: calc(var(--radius) - 2px);
+  }
+  .photo-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,22,40,0.6);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px;
+    border-radius: calc(var(--radius) - 2px);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .photo-zone.has-photo:hover .photo-overlay { opacity: 1; }
+  .photo-overlay span { font-size: 13px; font-weight: 600; color: var(--white); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .photo-placeholder {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px; padding: 32px;
+  }
+  .camera-icon {
+    width: 48px; height: 48px;
+    background: var(--navy-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-placeholder p { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .photo-placeholder small { font-size: 11px; color: var(--border); text-align: center; }
+
+  #photo-input { display: none; }
+
+  .notes-input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    width: 100%;
+    resize: none;
+    min-height: 80px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .notes-input::placeholder { color: var(--muted); }
+  .notes-input:focus { border-color: var(--accent); }
+
+  .submit-btn {
+    background: var(--accent);
+    color: var(--navy);
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px;
+    width: 100%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover { background: var(--accent-dim); }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
+
+  .already-done {
+    background: rgba(61,232,122,0.1);
+    border: 1px solid rgba(61,232,122,0.3);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .check-circle {
+    width: 52px; height: 52px;
+    background: rgba(61,232,122,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .already-done h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 800;
+    text-transform: uppercase;
+    color: var(--green);
+    letter-spacing: 0.04em;
+  }
+  .already-done p { font-size: 13px; color: var(--muted); }
+
+  .off-day {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .off-day h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 800;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .off-day p { font-size: 13px; color: var(--muted); }
+
+  .log-anyway-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-family: 'Barlow', sans-serif;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .log-anyway-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .submit-loading { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+  .streak-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(232,244,58,0.1);
+    border: 1px solid rgba(232,244,58,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px; font-weight: 600;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="8" stroke="#0a1628" stroke-width="2"/>
+      <path d="M6 10 Q10 4 14 10 Q10 16 6 10Z" fill="#0a1628"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>Arm Care Daily</h1>
+    <p id="header-date">Loading...</p>
+  </div>
+</header>
+
+<div class="main" id="app">
+  <div class="loading-card">
+    <div class="spinner" style="margin-bottom:10px;"></div>
+    Loading your program...
+  </div>
+</div>
+
+<input type="file" id="photo-input" accept="image/*" capture="environment">
+
+<script>
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+const params = new URLSearchParams(window.location.search);
+const playerId = params.get('p');
+
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today = new Date();
+const dateStr = `${days[today.getDay()]}, ${months[today.getMonth()]} ${today.getDate()}`;
+document.getElementById('header-date').textContent = dateStr;
+
+let photoFile = null;
+let playerData = null;
+
+async function init() {
+  const app = document.getElementById('app');
+
+  if (!playerId) {
+    app.innerHTML = `<div class="error-card">No player ID found in this link. Make sure you're using the link sent to you by your coach.</div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getPlayer&playerId=${encodeURIComponent(playerId)}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      app.innerHTML = `<div class="error-card">${data.error || 'Could not load your program. Try again or contact your coach.'}</div>`;
+      return;
+    }
+
+    playerData = data;
+    render(data);
+  } catch(e) {
+    app.innerHTML = `<div class="error-card">Connection error. Check your internet and try again.</div>`;
+  }
+}
+
+function render(data) {
+  const app = document.getElementById('app');
+  const isOff = data.workout && (data.workout.toLowerCase().includes('off') || data.workload === 0);
+  const alreadyCheckedIn = data.checkedInToday;
+
+  let html = `
+    <div class="player-greeting">
+      <span class="hey">Good ${getTimeOfDay()},</span>
+      <span class="name">${data.firstName}</span>
+      <span class="date-row">${dateStr}</span>
+    </div>`;
+
+  if (data.streak > 1) {
+    html += `<div><span class="streak-badge">🔥 ${data.streak}-day streak</span></div>`;
+  }
+
+  if (data.workout) {
+    html += `
+    <div class="workout-card">
+      <div class="workout-label">Today's session</div>
+      <div class="workout-name">${data.workout}</div>
+      ${data.workoutDesc ? `<div class="workout-desc">${data.workoutDesc}</div>` : ''}
+      ${data.workload ? `<div style="margin-top:10px; font-size:12px; color:var(--accent); font-weight:600;">Target workload: ${data.workload}</div>` : ''}
+    </div>`;
+  }
+
+  if (alreadyCheckedIn) {
+    html += `
+    <div class="already-done">
+      <div class="check-circle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 13l4 4L19 7" stroke="#3de87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Already checked in today</h2>
+      <p>Logged at ${data.checkedInTime}. See you tomorrow.</p>
+    </div>`;
+  } else if (isOff) {
+    html += `
+    <div class="off-day" id="off-day-card">
+      <span style="font-size:32px;">🛌</span>
+      <h2>Rest Day</h2>
+      <p>No throwing today. Recover well.</p>
+      <p style="margin-top:8px; font-size:12px; color:var(--muted);">Threw anyway?</p>
+      <button class="log-anyway-btn" onclick="showCheckinForm()">Log it here</button>
+    </div>`;
+  } else {
+    html += buildCheckinForm();
+  }
+
+  app.innerHTML = html;
+  document.getElementById('photo-input').addEventListener('change', handlePhoto);
+}
+
+function buildCheckinForm() {
+  return `
+    <div class="section-title">Post-throw photo</div>
+    <div class="photo-zone" id="photo-zone" onclick="document.getElementById('photo-input').click()">
+      <div class="photo-placeholder" id="photo-placeholder">
+        <div class="camera-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#8899bb" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="12" cy="13" r="4" stroke="#8899bb" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <p>Tap to take a photo</p>
+        <small>Required — snap a pic when you finish throwing</small>
+      </div>
+      <div class="photo-overlay" id="photo-overlay">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="white" stroke-width="1.5"/>
+          <circle cx="12" cy="13" r="4" stroke="white" stroke-width="1.5"/>
+        </svg>
+        <span>Change photo</span>
+      </div>
+    </div>
+    <div>
+      <div class="section-title" style="margin-bottom:8px;">Notes (optional)</div>
+      <textarea class="notes-input" id="notes" placeholder="How did it feel? Any arm soreness?"></textarea>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitCheckin()">Submit check-in</button>`;
+}
+
+function showCheckinForm() {
+  const app = document.getElementById('app');
+  const offCard = document.getElementById('off-day-card');
+
+  if (offCard) {
+    offCard.innerHTML = `
+      <span style="font-size:32px;">💪</span>
+      <h2 style="color:var(--accent);">Log Your Throw</h2>
+      <p>Nice work putting in extra effort.</p>`;
+  }
+
+  const formDiv = document.createElement('div');
+  formDiv.style.display = 'contents';
+  formDiv.innerHTML = buildCheckinForm();
+  app.appendChild(formDiv);
+
+  document.getElementById('photo-input').addEventListener('change', handlePhoto);
+}
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Compress image before storing
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 1200;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob((blob) => {
+        photoFile = new File([blob], file.name, { type: 'image/jpeg' });
+
+        // Show preview
+        const zone = document.getElementById('photo-zone');
+        const placeholder = document.getElementById('photo-placeholder');
+        if (!zone) return;
+
+        let previewImg = zone.querySelector('img');
+        if (!previewImg) {
+          previewImg = document.createElement('img');
+          zone.appendChild(previewImg);
+        }
+        previewImg.src = canvas.toDataURL('image/jpeg', 0.8);
+        zone.classList.add('has-photo');
+        if (placeholder) placeholder.style.display = 'none';
+      }, 'image/jpeg', 0.8);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitCheckin() {
+  if (!photoFile) {
+    alert('Please take a photo first.');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="submit-loading"><div class="spinner"></div> Submitting...</div>`;
+
+  try {
+    const base64 = await fileToBase64(photoFile);
+    const notes = document.getElementById('notes')?.value || '';
+
+    const payload = {
+      action: 'checkin',
+      playerId,
+      playerName: playerData.playerName,
+      workout: playerData.workout,
+      notes,
+      photo: base64,
+      photoType: 'image/jpeg',
+      timestamp: new Date().toISOString()
+    };
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      const app = document.getElementById('app');
+      const greeting = app.querySelector('.player-greeting');
+      const streak = app.querySelector('.streak-badge')?.parentElement;
+      const workoutCard = app.querySelector('.workout-card');
+
+      const successDiv = document.createElement('div');
+      successDiv.className = 'already-done';
+      successDiv.innerHTML = `
+        <div class="check-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="#3de87a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Check-in submitted!</h2>
+        <p>Your coach has been notified. Great work today.</p>`;
+
+      app.innerHTML = '';
+      if (greeting) app.appendChild(greeting);
+      if (streak) app.appendChild(streak);
+      if (workoutCard) app.appendChild(workoutCard);
+      app.appendChild(successDiv);
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Submit check-in';
+      alert('Submission failed: ' + (result.error || 'Unknown error. Try again.'));
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Submit check-in';
+    alert('Connection error. Check your internet and try again.');
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h < 12) return 'morning';
+  if (h < 17) return 'afternoon';
+  return 'evening';
+}
+
+init();
+</script>
+</body>
+</html>
