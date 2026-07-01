@@ -116,7 +116,27 @@
     line-height: 1;
     margin-bottom: 8px;
   }
-  .workout-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .workout-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .workout-notes {
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 600;
+    line-height: 1.5;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .workout-workload {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
 
   .loading-card {
     background: var(--card);
@@ -396,7 +416,8 @@ function render(data) {
       <div class="workout-label">Today's session</div>
       <div class="workout-name">${data.workout}</div>
       ${data.workoutDesc ? `<div class="workout-desc">${data.workoutDesc}</div>` : ''}
-      ${data.workload ? `<div style="margin-top:10px; font-size:12px; color:var(--accent); font-weight:600;">Target workload: ${data.workload}</div>` : ''}
+      ${data.workoutNotes ? `<div class="workout-notes">📋 ${data.workoutNotes}</div>` : ''}
+      ${data.workload ? `<div class="workout-workload">Target workload: ${data.workload}</div>` : ''}
     </div>`;
   }
 
@@ -480,7 +501,6 @@ function handlePhoto(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  // Compress image before storing
   const reader = new FileReader();
   reader.onload = (ev) => {
     const img = new Image();
@@ -505,7 +525,6 @@ function handlePhoto(e) {
       canvas.toBlob((blob) => {
         photoFile = new File([blob], file.name, { type: 'image/jpeg' });
 
-        // Show preview
         const zone = document.getElementById('photo-zone');
         const placeholder = document.getElementById('photo-placeholder');
         if (!zone) return;
