@@ -417,7 +417,7 @@ function render(data) {
       <div class="workout-name">${data.workout}</div>
       ${data.workoutDesc ? `<div class="workout-desc">${data.workoutDesc}</div>` : ''}
       ${data.workoutNotes ? `<div class="workout-notes">📋 ${data.workoutNotes}</div>` : ''}
-      ${data.workload ? `<div class="workout-workload">Target workload: ${data.workload}</div>` : ''}
+      ${data.hasWorkload && data.workload ? `<div class="workout-workload">Target workload: ${data.workload}</div>` : ''}
     </div>`;
   }
 
