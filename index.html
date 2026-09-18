@@ -475,7 +475,7 @@ function buildCheckinForm() {
       <div class="section-title" style="margin-bottom:8px;">Notes (optional)</div>
       <textarea class="notes-input" id="notes" placeholder="How did it feel? Any arm soreness?"></textarea>
     </div>
-    <button class="submit-btn" id="submit-btn" onclick="submitCheckin()">Submit check-in</button>`;
+    <button class="submit-btn" id="submit-btn" onclick="submitCheckin()" disabled>Submit check-in</button>`;
 }
 
 function showCheckinForm() {
@@ -537,6 +537,8 @@ function handlePhoto(e) {
         previewImg.src = canvas.toDataURL('image/jpeg', 0.8);
         zone.classList.add('has-photo');
         if (placeholder) placeholder.style.display = 'none';
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) submitBtn.disabled = false;
       }, 'image/jpeg', 0.8);
     };
     img.src = ev.target.result;
